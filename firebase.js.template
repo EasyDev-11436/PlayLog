@@ -1,0 +1,21 @@
+// firebase.js
+import { initializeApp } from 'firebase/app';
+import { getFirestore, collection } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
+
+const firebaseConfig = {
+  apiKey: 'YOUR_FIREBASE_DETAIL',
+  authDomain: 'YOUR_FIREBASE_DETAIL',
+  projectId: 'YOUR_FIREBASE_DETAIL',
+  storageBucket: 'YOUR_FIREBASE_DETAIL',
+  messagingSenderId: 'YOUR_FIREBASE_DETAIL',
+  appId: 'YOUR_FIREBASE_DETAIL',
+  measurementId: 'YOUR_FIREBASE_DETAIL',
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const gamesCollection = collection(db, 'games');
+
+export { auth, db, gamesCollection };
