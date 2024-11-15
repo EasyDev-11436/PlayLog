@@ -1,6 +1,6 @@
 # PlayLog
 
-[![Visit Page](https://img.shields.io/badge/Visit_Page-Click_Here-brightgreen?style=for-the-badge)](https://playlog.vercel.app)
+[![Visit Page](https://img.shields.io/badge/Visit_Page-Click_Here-brightgreen?style=for-the-badge)](https://playlogs.vercel.app)
 
 © EasyDeveloper 2024. All Rights Reserved.
 
