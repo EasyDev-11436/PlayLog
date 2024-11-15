@@ -24,6 +24,7 @@ export default function Home() {
     input: "",
   });
   const [selectedStatus, setSelectedStatus] = useState("All"); // New state for status filter
+  const [error, setError] = useState(""); // State for error messages
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(user => {
@@ -60,12 +61,18 @@ export default function Home() {
         game_version: gameVersion,
         is_game_completed: isGameCompleted,
       };
-      await addDoc(collection(db, "users", user.uid, "games"), newGameObj); // Add to user's games
-      setNewGame({
-        gameName: "",
-        gameVersion: "",
-        isGameCompleted: false,
-      });
+      try {
+        await addDoc(collection(db, "users", user.uid, "games"), newGameObj); // Add to user's games
+        setNewGame({
+          gameName: "",
+          gameVersion: "",
+          isGameCompleted: false,
+        });
+      } catch (err) {
+        setError("Failed to add the game. Please try again."); // Set error message
+      }
+    } else {
+      setError("Please login first");
     }
   };
 
@@ -79,21 +86,28 @@ export default function Home() {
       };
       const user = auth.currentUser ; // Get current user
 
-      await updateDoc(doc(db, "users", user.uid, "games", editingGame.id), updatedGame); // Update user's game
-
-      setEditingGame(null);
-      setNewGame({
-        gameName: "",
-        gameVersion: "",
-        isGameCompleted: false,
-      });
+      try {
+        await updateDoc(doc(db, "users", user.uid, "games", editingGame.id), updatedGame); // Update user's game
+        setEditingGame(null);
+        setNewGame({
+          gameName: "",
+          gameVersion: "",
+          isGameCompleted: false,
+        });
+      } catch (err) {
+        setError("Failed to save changes. Please try again."); // Set error message
+      }
     }
   };
 
   const handleDeleteGame = async () => {
     if (deleteConfirmation.input === deleteConfirmation.gameName) {
       const user = auth.currentUser ; // Get current user
-      await deleteDoc(doc(db, "users", user.uid, "games", deleteConfirmation.gameId)); // Delete user's game
+      try {
+        await deleteDoc(doc(db, "users", user.uid, "games", deleteConfirmation.gameId)); // Delete user's game
+      } catch (err) {
+        setError("Failed to delete the game. Please try again."); // Set error message
+      }
     }
     setDeleteConfirmation({
       isOpen: false,
@@ -104,12 +118,12 @@ export default function Home() {
   };
 
   const handleExport = async () => {
-    const user = auth.currentUser ; // Get current user
+    const user = auth.currentUser  ; // Get current user
     if (user) {
       const gamesToExport = games.map(({ id, ...game }) => game); // Prepare games data for export
       const blob = new Blob([JSON.stringify(gamesToExport, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
- const a = document.createElement('a');
+      const a = document.createElement('a');
       a.href = url;
       a.download = 'games_list.json';
       a.click();
@@ -118,15 +132,19 @@ export default function Home() {
   };
 
   const handleImport = async (event) => {
-    const user = auth.currentUser  ; // Get current user
+    const user = auth.currentUser   ; // Get current user
     const file = event.target.files[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = async (e) => {
         const importedGames = JSON.parse(e.target.result);
         const gamesCollection = collection(db, "users", user.uid, "games");
-        for (const game of importedGames) {
-          await addDoc(gamesCollection, game); // Add each game to Firestore
+        try {
+          for (const game of importedGames) {
+            await addDoc(gamesCollection, game); // Add each game to Firestore
+          }
+        } catch (err) {
+          setError("Failed to import games. Please check the file format."); // Set error message
         }
       };
       reader.readAsText(file);
@@ -158,6 +176,12 @@ export default function Home() {
 
   return (
     <div className="container mx-auto p-4">
+      {error && (
+        <div className="bg-red-500 text-white p-4 rounded-lg mb-4">
+          {error}
+          <button onClick={() => setError("")} className="ml-4 underline">Dismiss</button>
+        </div>
+      )}
       <div className="bg-white p-8 rounded-lg shadow-lg max-w-lg mx-auto">
         <img className="mx-auto mb-6" src="/logo.svg" alt="Logo" width="50" height="50" />
         <AuthComponent />
@@ -358,7 +382,7 @@ export default function Home() {
             </div>
           </div>
         )}
+      </div>
     </div>
-  </div>
   );
 }
