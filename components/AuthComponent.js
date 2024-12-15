@@ -1,103 +1,86 @@
-// components/AuthComponent.js
-import { useState, useEffect } from 'react';
-import { registerUser , loginUser , logoutUser  } from '../lib/auth';
-import { auth } from '../firebase'; // Import Firebase auth
+"use client";
+
+import { useState } from 'react';
+import { auth } from '../firebase';
+import { loginUser, registerUser, logoutUser } from '../lib/auth';
 
 export default function AuthComponent() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLogin, setIsLogin] = useState(true);
-  const [user, setUser ] = useState(null);
-
-  // Listen for authentication state changes
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      if (user) {
-        setUser (user);
-      } else {
-        setUser (null);
-      }
-    });
-    
-    return () => unsubscribe(); // Cleanup subscription on unmount
-  }, []);
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
     try {
       if (isLogin) {
-        await loginUser (email, password);
-        console.log('User  logged in successfully');
+        await loginUser(email, password);
       } else {
-        await registerUser (email, password);
-        console.log('User  registered successfully');
-        setIsLogin(true); // Switch to login after registration
+        await registerUser(email, password);
       }
     } catch (error) {
-      console.error('Authentication error:', error.message);
+      setError(error.message);
     }
   };
 
   const handleLogout = async () => {
-    await logoutUser ();
-    console.log('User  logged out successfully');
+    try {
+      await logoutUser();
+    } catch (error) {
+      setError(error.message);
+    }
   };
 
-  return (
-    <div className="flex justify-center items-center p-8">
-      <div className="bg-white p-8 rounded-lg shadow-md w-96">
-        {user ? (
-          // Profile View
-          <div className="text-center">
-            <h2 className="text-2xl font-bold mb-4">Welcome, {user.email}!</h2>
-            <button
-              onClick={handleLogout}
-              className="mt-4 bg-red-500 text-white p-2 rounded-md hover:bg-red-600 transition duration-200"
-            >
-              Logout
-            </button>
-          </div>
-        ) : (
-          // Login/Register Form
-          <>
-            <h2 className="text-2xl font-bold text-center mb-6">{isLogin ? 'Login' : 'Register'}</h2>
-            <form onSubmit={handleSubmit}>
-              <div className="mb-4">
-                <input
-                  type="email"
-                  placeholder="Email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div className="mb-4">
-                <input
-                  type="password"
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <button
-                type="submit"
-                className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition duration-200"
-              >
-                {isLogin ? 'Login' : 'Register'}
-              </button>
-            </form>
-            <button
-              onClick={() => setIsLogin(!isLogin)}
-              className="mt-4 text-blue-500 hover:underline"
-            >
-              Switch to {isLogin ? 'Register' : 'Login'}
-            </button>
-          </>
-        )}
+  if (auth.currentUser) {
+    return (
+      <div className="glassmorphism p-6 rounded-xl text-center">
+        <h2 className="text-2xl font-bold mb-4">Welcome, {auth.currentUser.email}!</h2>
+        <button
+          onClick={handleLogout}
+          className="btn btn-secondary"
+        >
+          Logout
+        </button>
       </div>
+    );
+  }
+
+  return (
+    <div className="glassmorphism p-6 rounded-xl">
+      <h2 className="text-2xl font-bold text-center mb-6">{isLogin ? 'Login' : 'Register'}</h2>
+      {error && <p className="text-destructive mb-4">{error}</p>}
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          className="input"
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          className="input"
+        />
+        <button
+          type="submit"
+          className="btn btn-primary w-full"
+        >
+          {isLogin ? 'Login' : 'Register'}
+        </button>
+      </form>
+      <button
+        onClick={() => setIsLogin(!isLogin)}
+        className="mt-4 text-primary hover:underline text-sm"
+      >
+        {isLogin ? 'Need an account? Register' : 'Already have an account? Login'}
+      </button>
     </div>
   );
 }
+
