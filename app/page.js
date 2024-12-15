@@ -165,74 +165,78 @@ export default function Home() {
 
       {/* Delete Bottom Sheet */}
       {showDeleteBottomSheet && (
-        <div className="fixed inset-x-0 bottom-0 bg-card p-6 rounded-t-3xl shadow-lg">
-          <h3 className="text-lg font-semibold mb-4">Confirm Deletion</h3>
-          <p className="mb-4">To confirm, type the game name: &quot;{selectedGame?.game_name}&quot;</p>
-          <input
-            type="text"
-            value={confirmationText}
-            onChange={(e) => setConfirmationText(e.target.value)}
-            placeholder={`Type ${selectedGame?.game_name}`}
-            className="input mb-4"
-          />
-          <div className="flex justify-end space-x-2">
-            <button
-              onClick={() => {
-                setShowDeleteBottomSheet(false);
-                setSelectedGame(null);
-                setConfirmationText("");
-              }}
-              className="btn btn-secondary"
-            >
-              Cancel
-            </button>
-            <button onClick={handleDelete} className="btn btn-primary">
-              Delete
-            </button>
+        <div className="fixed inset-0 bg-black bg-opacity-20 backdrop-blur-lg flex justify-center items-center z-50">
+          <div className="fixed bottom-0 bg-card p-6 rounded-t-3xl shadow-lg w-full max-w-screen-lg">
+            <h3 className="text-lg font-semibold mb-4">Confirm Deletion</h3>
+            <p className="mb-4">To confirm, type the game name: &quot;{selectedGame?.game_name}&quot;</p>
+            <input
+              type="text"
+              value={confirmationText}
+              onChange={(e) => setConfirmationText(e.target.value)}
+              placeholder={`Type "${selectedGame?.game_name}"`}
+              className="input mb-4"
+            />
+            <div className="flex justify-end space-x-2">
+              <button
+                onClick={() => {
+                  setShowDeleteBottomSheet(false);
+                  setSelectedGame(null);
+                  setConfirmationText("");
+                }}
+                className="btn btn-secondary"
+              >
+                Cancel
+              </button>
+              <button onClick={handleDelete} className="btn btn-primary">
+                Delete
+              </button>
+            </div>
           </div>
         </div>
       )}
-
+      
       {/* Edit Bottom Sheet */}
       {showEditBottomSheet && (
-        <div className="fixed inset-x-0 bottom-0 bg-card p-6 rounded-t-3xl shadow-lg">
-          <h3 className="text-lg font-semibold mb-4">Edit Game</h3>
-          <input
-            type="text"
-            value={editedGame?.game_name}
-            onChange={(e) => setEditedGame({ ...editedGame, game_name: e.target.value })}
-            placeholder="Game Name"
-            className="input mb-4"
-          />
-          <input
-            type="text"
-            value={editedGame?.game_version}
-            onChange={(e) => setEditedGame({ ...editedGame, game_version: e.target.value })}
-            placeholder="Game Version"
-            className="input mb-4"
-          />
-          <div className="flex items-center mb-4">
+        <div className="fixed inset-0 bg-black bg-opacity-20 backdrop-blur-lg flex justify-center items-center z-50">
+          <div className="fixed bottom-0 bg-card p-6 rounded-t-3xl shadow-lg w-full max-w-screen-lg">
+            <h3 className="text-lg font-semibold mb-4">Edit Game</h3>
             <input
-              type="checkbox"
-              checked={editedGame?.is_game_completed}
-              onChange={(e) => setEditedGame({ ...editedGame, is_game_completed: e.target.checked })}
-              className="mr-2 h-5 w-5"
+              type="text"
+              value={editedGame?.game_name}
+              onChange={(e) => setEditedGame({ ...editedGame, game_name: e.target.value })}
+              placeholder="Game Name"
+              className="input mb-4"
             />
-            <span className="text-sm font-medium text-muted-foreground">Completed</span>
-          </div>
-          <div className="flex justify-end space-x-2">
-            <button
-              onClick={() => {
-                setShowEditBottomSheet(false);
-                setEditedGame(null);
-              }}
-              className="btn btn-secondary"
-            >
-              Cancel
-            </button>
-            <button onClick={handleEdit} className="btn btn-primary">
-              Save Changes
-            </button>
+            <input
+              type="text"
+              value={editedGame?.game_version}
+              onChange={(e) => setEditedGame({ ...editedGame, game_version: e.target.value })}
+              placeholder="Game Version"
+              className="input mb-4"
+            />
+            <div className="flex items-center mb-4">
+              <input
+                type="checkbox"
+                checked={editedGame?.is_game_completed}
+                onChange={(e) => setEditedGame({ ...editedGame, is_game_completed: e.target.checked })}
+                className="mr-2 h-5 w-5"
+              />
+              <span className="text-sm font-medium text-muted-foreground">Completed</span>
+            </div>
+            <div className="flex justify-end space-x-2">
+              <button
+                onClick={() => {
+                  setShowEditBottomSheet(false);
+                  setEditedGame(null);
+                }}
+                className="btn btn-secondary"
+              >
+                Cancel
+              </button>
+              <button onClick={handleEdit} className="btn btn-primary">
+                Save Changes
+              </button>
+            </div>
           </div>
         </div>
       )}
