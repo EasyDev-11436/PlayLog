@@ -167,7 +167,7 @@ export default function Home() {
       {showDeleteBottomSheet && (
         <div className="fixed inset-x-0 bottom-0 bg-card p-6 rounded-t-3xl shadow-lg">
           <h3 className="text-lg font-semibold mb-4">Confirm Deletion</h3>
-          <p className="mb-4">To confirm, type the game name: "{selectedGame?.game_name}"</p>
+          <p className="mb-4">To confirm, type the game name: &quot;{selectedGame?.game_name}&quot;</p>
           <input
             type="text"
             value={confirmationText}
