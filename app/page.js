@@ -21,7 +21,7 @@ export default function Home() {
   const [confirmationText, setConfirmationText] = useState("");
   const { theme, setTheme } = useTheme();
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 12; // Number of games per page
+  const itemsPerPage = 21; // Number of games per page
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -114,6 +114,13 @@ export default function Home() {
   useEffect(() => {
     setCurrentPage(1); // Reset to page 1 when filters or search term changes
   }, [selectedStatus, searchTerm]);
+  
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => setError(""), 3000); // Dismiss after 5 seconds
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 transition-all duration-300">
@@ -170,14 +177,6 @@ export default function Home() {
             </select>
           </div>
         </div>
-        {error && (
-          <div className="bg-destructive/10 text-destructive p-4 rounded-lg mt-4 glassmorphism">
-            {error}
-            <button onClick={() => setError("")} className="ml-4 underline">
-              Dismiss
-            </button>
-          </div>
-        )}
         <div className="mt-4 mb-2 text-sm text-muted-foreground">Total Games: {filteredGames.length}</div>
         {/* Game List */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
@@ -202,9 +201,9 @@ export default function Home() {
           {currentPage > 1 && (
             <button
               onClick={() => setCurrentPage(currentPage - 1)}
-              className="btn"
+              className="btn flex items-center justify-center h-8 w-8 btn-secondary"
             >
-              Prev
+              &lt;
             </button>
           )}
           {getPageNumbers().map((page, index) => (
@@ -219,9 +218,9 @@ export default function Home() {
           {currentPage < totalPages && (
             <button
               onClick={() => setCurrentPage(currentPage + 1)}
-              className="btn"
+              className="btn flex items-center justify-center h-8 w-8 btn-secondary"
             >
-              Next
+              &gt;
             </button>
           )}
         </div>
@@ -302,6 +301,19 @@ export default function Home() {
               </button>
             </div>
           </div>
+        </div>
+      )}
+      {error && (
+        <div
+          className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-destructive/20 bg-clip-padding backdrop-filter backdrop-blur backdrop-saturate-0 backdrop-contrast-50 px-6 py-4 rounded-lg shadow-lg z-50 flex items-center justify-between space-x-4 max-w-screen-sm w-[calc(100%-2rem)] sm:w-auto"
+        >
+          <span className="text-sm font-medium">{error}</span>
+          <button
+            onClick={() => setError("")}
+            className="underline text-sm font-medium hover:text-foreground focus:outline-none"
+          >
+            Dismiss
+          </button>
         </div>
       )}
     </div>
