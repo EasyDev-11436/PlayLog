@@ -85,7 +85,7 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 transition-all duration-300">
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-600">
+          <h1 className="text-4xl p-4 font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-600">
             PlayLog
           </h1>
           <button
