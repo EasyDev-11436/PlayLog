@@ -52,7 +52,7 @@ export default function Home() {
       (selectedStatus === "Completed" && game.is_game_completed) ||
       (selectedStatus === "In Progress" && !game.is_game_completed);
     return matchesSearch && matchesStatus;
-  });
+  }).sort((a, b) => a.game_name.localeCompare(b.game_name));
 
   const handleDelete = async () => {
     const user = auth.currentUser;
