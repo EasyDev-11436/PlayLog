@@ -1,5 +1,6 @@
 import './globals.css'
 import { ThemeProvider } from '../components/theme-provider'
+import GoogleAdsense from '../components/GoogleAdsense'
 
 export const metadata = {
   title: 'PlayLog',
@@ -7,9 +8,12 @@ export const metadata = {
 }
 
 export default function RootLayout({ children }) {
+
+  const pId = process.env.NEXT_PUBLIC_ADSENSE_PID
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="font-sans">
+        <GoogleAdsense pId={pId}/>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           {children}
         </ThemeProvider>
