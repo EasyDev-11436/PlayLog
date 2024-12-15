@@ -20,6 +20,8 @@ export default function Home() {
   const [editedGame, setEditedGame] = useState(null);
   const [confirmationText, setConfirmationText] = useState("");
   const { theme, setTheme } = useTheme();
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 12; // Number of games per page
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -80,6 +82,38 @@ export default function Home() {
       }
     }
   };
+  
+    // Pagination logic
+  const totalPages = Math.ceil(filteredGames.length / itemsPerPage);
+  const startIdx = (currentPage - 1) * itemsPerPage;
+  const paginatedGames = filteredGames.slice(startIdx, startIdx + itemsPerPage);
+
+  const getPageNumbers = () => {
+    const pages = [];
+    if (totalPages <= 5) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (currentPage <= 3) {
+        pages.push(1, 2, 3, 4, "...", totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        pages.push(1, "...", totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+      } else {
+        pages.push(1, "...", currentPage - 1, currentPage, currentPage + 1, "...", totalPages);
+      }
+    }
+    return pages;
+  };
+
+  const handlePageChange = (page) => {
+    if (page === "...") return;
+    setCurrentPage(page);
+  };
+
+  useEffect(() => {
+    setCurrentPage(1); // Reset to page 1 when filters or search term changes
+  }, [selectedStatus, searchTerm]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 transition-all duration-300">
@@ -145,8 +179,9 @@ export default function Home() {
           </div>
         )}
         <div className="mt-4 mb-2 text-sm text-muted-foreground">Total Games: {filteredGames.length}</div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
-          {filteredGames.map((game) => (
+        {/* Game List */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          {paginatedGames.map((game) => (
             <GameCard 
               key={game.id} 
               game={game} 
@@ -161,8 +196,37 @@ export default function Home() {
             />
           ))}
         </div>
-      </div>
 
+        {/* Pagination */}
+        <div className="flex items-center justify-center space-x-2">
+          {currentPage > 1 && (
+            <button
+              onClick={() => setCurrentPage(currentPage - 1)}
+              className="btn"
+            >
+              Prev
+            </button>
+          )}
+          {getPageNumbers().map((page, index) => (
+            <button
+              key={index}
+              onClick={() => handlePageChange(page)}
+              className={`btn flex items-center justify-center h-8 w-8 ${page === currentPage ? "btn-primary" : "btn-secondary"}`}
+            >
+              {page}
+            </button>
+          ))}
+          {currentPage < totalPages && (
+            <button
+              onClick={() => setCurrentPage(currentPage + 1)}
+              className="btn"
+            >
+              Next
+            </button>
+          )}
+        </div>
+      </div>
+      
       {/* Delete Bottom Sheet */}
       {showDeleteBottomSheet && (
         <div className="fixed inset-0 bg-black bg-opacity-20 backdrop-blur-lg flex justify-center items-center z-50">
