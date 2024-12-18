@@ -1,44 +1,119 @@
 "use client";
 
-import { useState } from 'react';
-import { auth } from '../firebase';
-import { loginUser, registerUser, logoutUser } from '../lib/auth';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import { auth, db } from "../firebase";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "firebase/auth";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { MdVerified } from "react-icons/md";
 
-export default function AuthComponent() {
+export default function AuthComponent({ setToast }) {
+  const [user, setUser] = useState(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLogin, setIsLogin] = useState(true);
-  const [error, setError] = useState('');
+  const [name, setName] = useState('');
+  const [isVerified, setVerified] = useState(false);
+  const [roles, setRoles] = useState('');
+  const [profilePicture, setProfilePicture] = useState('/placeholder-avatar.svg');
+  const router = useRouter();
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        setUser(user);
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          setName(userData.name || '');
+          setVerified(userData.isVerified || false);
+          setRoles(userData.roles || '');
+          setProfilePicture(userData.profilePicture || '/placeholder-avatar.svg');
+        }
+      } else {
+        setUser(null);
+        setName('');
+        setVerified(false)
+        setRoles('');
+        setProfilePicture('/placeholder-avatar.svg');
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
     try {
       if (isLogin) {
-        await loginUser(email, password);
+        await signInWithEmailAndPassword(auth, email, password);
       } else {
-        await registerUser(email, password);
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        await setDoc(doc(db, 'users', userCredential.user.uid), {
+          email: userCredential.user.email,
+          name: '',
+          gender: '',
+          isVerified: false,
+          roles: '',
+          profilePicture: '/placeholder-avatar.svg'
+        });
+        setToast(`${userCredential.user.email} has been registered`, "success");
       }
     } catch (error) {
-      setError(error.message);
+      const code = error.code;
+      console.log(code);
+      if (code === "auth/invalid-credential") {
+        setToast("Please check your email or password", "error");
+      } else if (code === "auth/email-already-in-use") {
+        setToast("The email has already registered", "error");
+      } else if (code == "auth/weak-password") {
+        setToast("Your password is too weak. Please choose a stronger password with at least 8 characters, including uppercase letters, lowercase letters, numbers, and special symbols.", "error")
+      }
     }
   };
 
   const handleLogout = async () => {
     try {
-      await logoutUser();
+      await signOut(auth);
     } catch (error) {
-      setError(error.message);
+      setToast(error.message, "error");
     }
   };
 
-  if (auth.currentUser) {
+  const handleEditProfile = () => {
+    router.push('/profile');
+  };
+
+  if (user) {
     return (
-      <div className="glassmorphism p-6 rounded-xl text-center">
-        <h2 className="text-2xl font-bold mb-4">Welcome, {auth.currentUser.email}!</h2>
+      <div className="flex w-full glassmorphism p-4 rounded-lg items-center justify-center space-x-4">
+        <div className="w-10 h-10 rounded-full overflow-hidden">
+          <Image
+            src={profilePicture}
+            alt="Profile Picture"
+            width={40}
+            height={40}
+            className="object-cover w-full h-full"
+          />
+        </div>
+        <div className="flex flex-col">
+          <span className="text-md flex items-center gap-1 justify-center font-medium">
+            {name || user.email} {isVerified && <MdVerified className="text-primary"/>}
+          </span>
+          <span className="text-sm font-medium">
+            {isVerified && roles}
+          </span>
+          <button
+            onClick={handleEditProfile}
+            className="text-xs text-indigo-400 hover:text-indigo-300"
+          >
+            Edit Profile
+          </button>
+        </div>
         <button
           onClick={handleLogout}
-          className="btn btn-secondary"
+          className="px-3 py-1 text-xs bg-white/10 hover:bg-white/20 rounded transition-colors"
         >
           Logout
         </button>
@@ -47,9 +122,8 @@ export default function AuthComponent() {
   }
 
   return (
-    <div className="glassmorphism p-6 rounded-xl">
-      <h2 className="text-2xl font-bold text-center mb-6">{isLogin ? 'Login' : 'Register'}</h2>
-      {error && <p className="text-destructive mb-4">{error}</p>}
+    <div className="glassmorphism p-4 rounded-lg">
+      <h2 className="text-xl font-bold text-center mb-4">{isLogin ? 'Login' : 'Register'}</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <input
           type="email"
@@ -69,14 +143,14 @@ export default function AuthComponent() {
         />
         <button
           type="submit"
-          className="btn btn-primary w-full"
+          className="w-full btn btn-primary"
         >
           {isLogin ? 'Login' : 'Register'}
         </button>
       </form>
       <button
         onClick={() => setIsLogin(!isLogin)}
-        className="mt-4 text-primary hover:underline text-sm"
+        className="mt-4 text-sm text-indigo-400 hover:text-indigo-300"
       >
         {isLogin ? 'Need an account? Register' : 'Already have an account? Login'}
       </button>

@@ -46,6 +46,13 @@
   --ring: 79 70 229;
 }
 
+@font-face {
+    font-family: 'MotoGP';
+    src: url('/fonts/MotoGP-Display-Bold.ttf');
+    font-weight: normal;
+    font-style: normal;
+}
+
 @layer base {
   body {
     @apply bg-background text-foreground;
@@ -75,6 +82,7 @@
 }
 
 html, body {
+  font-family: "MotoGP", sans-serif;
   min-width: 320px;
 }
 

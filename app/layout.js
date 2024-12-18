@@ -1,5 +1,5 @@
 import './globals.css'
-import { ThemeProvider } from '../components/theme-provider'
+import { ThemeProvider } from '../contexts/ThemeContext'
 import GoogleAdsense from '../components/GoogleAdsense'
 
 export const metadata = {

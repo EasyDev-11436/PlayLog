@@ -6,20 +6,22 @@ import { collection, onSnapshot, query, updateDoc, deleteDoc, doc } from "fireba
 import AuthComponent from "../components/AuthComponent";
 import AddGameForm from "../components/AddGameForm";
 import GameCard from "../components/GameCard";
-import { useTheme } from "next-themes";
+import ExportGames from "../components/ExportGames";
+import ImportGames from "../components/ImportGames";
+import { useTheme } from "../contexts/ThemeContext";
 import { FiMoon, FiSun } from "react-icons/fi";
 
 export default function Home() {
   const [games, setGames] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("All");
-  const [error, setError] = useState("");
+  const [toast, setToast] = useState({ message: "", type: "" });
   const [showDeleteBottomSheet, setShowDeleteBottomSheet] = useState(false);
   const [showEditBottomSheet, setShowEditBottomSheet] = useState(false);
   const [selectedGame, setSelectedGame] = useState(null);
   const [editedGame, setEditedGame] = useState(null);
   const [confirmationText, setConfirmationText] = useState("");
-  const { theme, setTheme } = useTheme();
+  const { theme, toggleTheme} = useTheme();
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 21; // Number of games per page
 
@@ -59,14 +61,15 @@ export default function Home() {
     if (user && selectedGame && confirmationText === selectedGame.game_name) {
       try {
         await deleteDoc(doc(db, "users", user.uid, "games", selectedGame.id));
+        showToast(`"${selectedGame?.game_name}" Deleted`, "success");
         setShowDeleteBottomSheet(false);
         setSelectedGame(null);
         setConfirmationText("");
       } catch (err) {
-        setError("Failed to delete the game. Please try again.");
+        showToast("Failed to delete the game. Please try again.", "error");
       }
     } else {
-      setError("Game name does not match. Please type the name correctly.");
+      showToast("Game name does not match. Please type the name correctly.", "error");
     }
   };
 
@@ -75,10 +78,11 @@ export default function Home() {
     if (user && editedGame) {
       try {
         await updateDoc(doc(db, "users", user.uid, "games", editedGame.id), editedGame);
+        showToast(`"${editedGame?.game_name}" updated`, "success");
         setShowEditBottomSheet(false);
         setEditedGame(null);
       } catch (err) {
-        setError("Failed to update the game. Please try again.");
+        showToast("Failed to update the game. Please try again.", "error");
       }
     }
   };
@@ -110,17 +114,21 @@ export default function Home() {
     if (page === "...") return;
     setCurrentPage(page);
   };
+  
+  const showToast = (message, type) => {
+    setToast({ message, type });
+  };
 
   useEffect(() => {
     setCurrentPage(1); // Reset to page 1 when filters or search term changes
   }, [selectedStatus, searchTerm]);
   
   useEffect(() => {
-    if (error) {
-      const timer = setTimeout(() => setError(""), 3000); // Dismiss after 5 seconds
+    if (toast) {
+      const timer = setTimeout(() => setToast(""), 3000); // Dismiss after 5 seconds
       return () => clearTimeout(timer);
     }
-  }, [error]);
+  }, [toast]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 transition-all duration-300">
@@ -130,15 +138,15 @@ export default function Home() {
             PlayLog
           </h1>
           <button
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            onClick={() => toggleTheme(theme === "dark" ? "light" : "dark")}
             className="p-2 rounded-full bg-secondary/50 hover:bg-secondary/80 transition-colors duration-200"
           >
             {theme === "dark" ? <FiSun className="w-5 h-5" /> : <FiMoon className="w-5 h-5" />}
           </button>
         </div>
-        <AuthComponent />
+        <AuthComponent setToast={showToast} />
         <div className="mt-8 glassmorphism p-6 rounded-xl">
-          <AddGameForm setError={setError} />
+          <AddGameForm setToast={showToast} />
           <div className="mt-4 flex flex-col sm:flex-row gap-4">
             <div className="relative flex-grow">
               <input
@@ -175,6 +183,10 @@ export default function Home() {
               <option value="Completed">Completed</option>
               <option value="In Progress">In Progress</option>
             </select>
+          </div>
+          <div className="grid mt-4 grid-cols-2 gap-2">
+              <ExportGames setToast={showToast} />
+              <ImportGames setToast={showToast} />
           </div>
         </div>
         <div className="mt-4 mb-2 text-sm text-muted-foreground">Total Games: {filteredGames.length}</div>
@@ -303,13 +315,12 @@ export default function Home() {
           </div>
         </div>
       )}
-      {error && (
+      {toast.message && (
         <div
-          className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-destructive/20 bg-clip-padding backdrop-filter backdrop-blur backdrop-saturate-0 backdrop-contrast-50 px-6 py-4 rounded-lg shadow-lg z-50 flex items-center justify-between space-x-4 max-w-screen-sm w-[calc(100%-2rem)] sm:w-auto"
-        >
-          <span className="text-sm font-medium">{error}</span>
+          className={`fixed top-4 left-1/2 transform -translate-x-1/2 ${toast.type === "success" ? "bg-success/20" : "bg-destructive/20"} bg-clip-padding backdrop-filter backdrop-blur backdrop-saturate-0 backdrop-contrast-50 px-6 py-4 rounded-lg shadow-lg z-50 flex items-center justify-between space-x-4 max-w-screen-sm w-[calc(100%-2rem)] sm:w-auto`}>
+          <span className="text-sm font-medium">{toast.message}</span>
           <button
-            onClick={() => setError("")}
+            onClick={() => setToast("")}
             className="underline text-sm font-medium hover:text-foreground focus:outline-none"
           >
             Dismiss

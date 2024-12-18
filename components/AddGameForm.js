@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { addDoc, collection } from "firebase/firestore";
 import { db, auth } from "../firebase";
 
-export default function AddGameForm({ setError }) {
+export default function AddGameForm({ setToast }) {
   const [newGame, setNewGame] = useState({
     gameName: "",
     gameVersion: "",
@@ -14,24 +14,29 @@ export default function AddGameForm({ setError }) {
     const { gameName, gameVersion, isGameCompleted } = newGame;
     const user = auth.currentUser;
 
-    if (user && gameName && gameVersion) {
-      const newGameObj = {
-        game_name: gameName,
-        game_version: gameVersion,
-        is_game_completed: isGameCompleted,
-      };
-      try {
-        await addDoc(collection(db, "users", user.uid, "games"), newGameObj);
-        setNewGame({
-          gameName: "",
-          gameVersion: "",
-          isGameCompleted: false,
-        });
-      } catch (err) {
-        setError("Failed to add the game. Please try again.");
+    if (user) {
+      if (gameName && gameVersion) {
+        const newGameObj = {
+          game_name: gameName,
+          game_version: gameVersion,
+          is_game_completed: isGameCompleted,
+        };
+        try {
+          await addDoc(collection(db, "users", user.uid, "games"), newGameObj);
+          setNewGame({
+            gameName: "",
+            gameVersion: "",
+            isGameCompleted: false,
+          });
+          setToast("Game added successfully", "success");
+        } catch (err) {
+          setToast("Failed to add the game. Please try again.", "error");
+        }
+      } else {
+        setToast("Please fill in all fields", "error");
       }
     } else {
-      setError("Please fill in all fields");
+      setToast("Please login to add game", "error");
     }
   };
 
