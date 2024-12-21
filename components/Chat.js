@@ -36,7 +36,7 @@ export default function Chat({ friendId }) {
 
       return () => unsubscribe()
     }
-  }, [friendId])
+  }, [friendId, clearNotification])
 
   useEffect(() => {
     // Scroll to the bottom of the messages container when messages change

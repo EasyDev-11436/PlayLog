@@ -131,7 +131,7 @@ export default function UserProfile() {
         <div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             {games.length === 0 ? (
-              <p className="text-gray-500">This user hasn't added any game yet.</p>
+              <p className="text-gray-500">This user hasn&apos;t added any game yet.</p>
             ) : (
               paginatedGames.map(game => (
               <GameCard key={game.id} game={game} />
@@ -167,7 +167,7 @@ export default function UserProfile() {
         </div>
       </div>
       ) : (
-        <p className="text-gray-500 text-md">This user's game list is private.</p>
+        <p className="text-gray-500 text-md">This user&apos;s game list is private.</p>
       )}
       {isFriend && (
         <div className="mt-8 glassmorphism p-4 rounded-xl">
