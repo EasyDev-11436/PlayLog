@@ -1,6 +1,8 @@
 import './globals.css'
 import { ThemeProvider } from '../contexts/ThemeContext'
 import GoogleAdsense from '../components/GoogleAdsense'
+import { NotificationProvider } from '../contexts/NotificationContext'
+import Toast from '../components/Toast'
 
 export const metadata = {
   title: 'PlayLog',
@@ -15,10 +17,14 @@ export default function RootLayout({ children }) {
       <body className="font-sans">
         <GoogleAdsense pId={pId}/>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          {children}
+          <NotificationProvider>
+            {children}
+            <Toast />
+          </NotificationProvider>
         </ThemeProvider>
       </body>
     </html>
   )
 }
+
 

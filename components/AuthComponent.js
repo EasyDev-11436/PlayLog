@@ -1,3 +1,5 @@
+// components/AuthComponent.js
+
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -56,7 +58,8 @@ export default function AuthComponent({ setToast }) {
           gender: '',
           isVerified: false,
           roles: '',
-          profilePicture: '/placeholder-avatar.svg'
+          profilePicture: '/placeholder-avatar.svg',
+          shareGameList: false
         });
         setToast(`${userCredential.user.email} has been registered`, "success");
       }

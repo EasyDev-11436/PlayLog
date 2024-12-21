@@ -1,9 +1,11 @@
+// app/profile/page.js
+
 "use client";
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { auth, db } from '../../firebase';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { LuArrowLeft } from 'react-icons/lu';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -17,6 +19,7 @@ export default function ProfilePage() {
   const [bio, setBio] = useState('');
   const [gender, setGender] = useState('');
   const [profilePicture, setProfilePicture] = useState('/placeholder-avatar.svg');
+  const [shareGameList, setShareGameList] = useState(false)
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [toast, setToast] = useState('');
@@ -36,6 +39,7 @@ export default function ProfilePage() {
           setBio(userData.bio || '');
           setGender(userData.gender || '');
           setProfilePicture(userData.profilePicture || '/placeholder-avatar.svg');
+          setShareGameList(userDoc.data().shareGameList || false)
         }
       }
       setIsLoading(false);
@@ -61,6 +65,12 @@ export default function ProfilePage() {
       setToast('Profile updated successfully!');
     }
   };
+  
+  const handleShareGameListChange = async (e) => {
+    const newShareGameList = e.target.checked
+    setShareGameList(newShareGameList)
+    await updateDoc(doc(db, 'users', user.uid), { shareGameList: newShareGameList })
+  }
 
   const compressImage = (file) => {
     return new Promise((resolve, reject) => {
@@ -194,6 +204,18 @@ export default function ProfilePage() {
             <option value="prefer-not-to-say">Prefer not to say</option>
           </select>
         </div>
+        <div className="mb-4">
+          <label className="flex items-center">
+            <input
+              type="checkbox"
+              checked={shareGameList}
+              onChange={handleShareGameListChange}
+              className="mr-2"
+            />
+            Share my game list with friends
+          </label>
+        </div>
+
         <div>
           <label htmlFor="bio" className="block mb-1">Bio</label>
           <textarea

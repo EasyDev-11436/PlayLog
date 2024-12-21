@@ -1,3 +1,5 @@
+// components/GoogleAdsense.js
+
 import Script from "next/script";
 
 const GoogleAdsense = ({ pId }) => {

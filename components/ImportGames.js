@@ -1,3 +1,5 @@
+// components/ImportGames.js
+
 import { useState } from 'react';
 import { db, auth } from "../firebase";
 import { collection, addDoc } from "firebase/firestore";

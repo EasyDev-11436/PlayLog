@@ -79,6 +79,9 @@
   .input {
     @apply w-full px-3 py-2 rounded-md border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring;
   }
+  .input-msg {
+    @apply w-full px-3 py-2 rounded-l-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring;
+  }
 }
 
 html, body {

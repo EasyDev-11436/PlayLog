@@ -1,3 +1,5 @@
+// components/GameCard.js
+
 import { AiOutlineEdit, AiOutlineDelete } from "react-icons/ai";
 import { MdCheckCircle, MdPending } from "react-icons/md";
 

@@ -1,3 +1,5 @@
+// components/AddGameForm.js
+
 import { useState } from 'react';
 import { addDoc, collection } from "firebase/firestore";
 import { db, auth } from "../firebase";

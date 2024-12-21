@@ -1,17 +1,21 @@
+// app/page.js
+
 "use client";
 
 import { useState, useEffect } from "react";
 import { db, auth } from "../firebase";
-import { collection, onSnapshot, query, updateDoc, deleteDoc, doc } from "firebase/firestore";
+import { collection, onSnapshot, where, query, getDocs, addDoc, updateDoc, deleteDoc, doc } from "firebase/firestore";
 import AuthComponent from "../components/AuthComponent";
 import AddGameForm from "../components/AddGameForm";
 import GameCard from "../components/GameCard";
 import ExportGames from "../components/ExportGames";
 import ImportGames from "../components/ImportGames";
+import FriendList from '../components/FriendList'
 import { useTheme } from "../contexts/ThemeContext";
 import { FiMoon, FiSun } from "react-icons/fi";
 
 export default function Home() {
+  const [currentUser, setUser] = useState(null);
   const [games, setGames] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("All");
@@ -21,9 +25,10 @@ export default function Home() {
   const [selectedGame, setSelectedGame] = useState(null);
   const [editedGame, setEditedGame] = useState(null);
   const [confirmationText, setConfirmationText] = useState("");
+  const [friendEmail, setFriendEmail] = useState('')
   const { theme, toggleTheme} = useTheme();
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 21; // Number of games per page
+  const itemsPerPage = 16; // Number of games per page
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -37,6 +42,8 @@ export default function Home() {
           }));
           setGames(fetchedGames);
         });
+        
+        setUser(user);
 
         return () => unsubscribeFromSnapshot();
       } else {
@@ -118,6 +125,33 @@ export default function Home() {
   const showToast = (message, type) => {
     setToast({ message, type });
   };
+  
+  const handleAddFriend = async (e) => {
+    e.preventDefault()
+    const user = auth.currentUser
+    if (user) {
+      const usersQuery = query(collection(db, 'users'), where('email', '==', friendEmail))
+      const usersSnapshot = await getDocs(usersQuery)
+      if (!usersSnapshot.empty) {
+        const friendUser = usersSnapshot.docs[0]
+        console.log('Friend user found:', friendUser.data())  // Add this line
+        const friendRequestData = {
+          from: user.uid,
+          to: friendUser.id,
+          createdAt: new Date()
+        }
+        console.log('Creating friend request:', friendRequestData)  // Add this line
+        const docRef = await addDoc(collection(db, 'friendRequests'), friendRequestData)
+        console.log('Friend request created with ID:', docRef.id)  // Add this line
+        showToast('Friend request sent!', 'success')
+        setFriendEmail('')
+      } else {
+        console.log('User not found for email:', friendEmail)  // Add this line
+        showToast('User not found', 'error')
+      }
+    }
+  }
+
 
   useEffect(() => {
     setCurrentPage(1); // Reset to page 1 when filters or search term changes
@@ -145,6 +179,24 @@ export default function Home() {
           </button>
         </div>
         <AuthComponent setToast={showToast} />
+        {currentUser && (
+        <div className="mt-8 glassmorphism p-6 rounded-xl">
+          <div>
+            <h2 className="text-xl font-bold mb-4">Friends</h2>
+            <FriendList />
+            <form onSubmit={handleAddFriend} className="mt-4">
+              <input
+                type="email"
+                value={friendEmail}
+                onChange={(e) => setFriendEmail(e.target.value)}
+                placeholder="Friend's email"
+                className="input mb-2"
+              />
+              <button type="submit" className="btn btn-primary w-full">Add Friend</button>
+            </form>
+          </div>
+        </div>
+        )}
         <div className="mt-8 glassmorphism p-6 rounded-xl">
           <AddGameForm setToast={showToast} />
           <div className="mt-4 flex flex-col sm:flex-row gap-4">
