@@ -3,7 +3,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import { auth, db } from '../firebase'
 import { collection, query, where, onSnapshot, orderBy } from 'firebase/firestore'
-
 const NotificationContext = createContext()
 
 export function useNotification() {
