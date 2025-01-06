@@ -1,3 +1,5 @@
+// components/FriendList.js
+
 import { useState, useEffect } from 'react'
 import { auth, db } from '../firebase'
 import { collection, query, where, onSnapshot, addDoc, deleteDoc, doc, getDoc } from 'firebase/firestore'

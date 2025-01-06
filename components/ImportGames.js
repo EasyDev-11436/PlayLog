@@ -1,39 +1,39 @@
 // components/ImportGames.js
 
-import { useState } from 'react';
-import { db, auth } from "../firebase";
-import { collection, addDoc } from "firebase/firestore";
+import { useState } from 'react'
+import { db, auth } from '../firebase'
+import { collection, addDoc } from 'firebase/firestore'
 
 export default function ImportGames({ setToast }) {
-  const [isImporting, setIsImporting] = useState(false);
+  const [isImporting, setIsImporting] = useState(false)
 
   const handleImport = async (event) => {
-    const file = event.target.files[0];
+    const file = event.target.files[0]
     if (file) {
-      setIsImporting(true);
-      const reader = new FileReader();
+      setIsImporting(true)
+      const reader = new FileReader()
       reader.onload = async (e) => {
         try {
-          const games = JSON.parse(e.target.result);
-          const user = auth.currentUser;
+          const games = JSON.parse(e.target.result)
+          const user = auth.currentUser
           if (user) {
-            const gamesCollection = collection(db, "users", user.uid, "games");
+            const gamesCollection = collection(db, 'users', user.uid, 'games')
             for (const game of games) {
-              const { id, ...gameData } = game;
-              await addDoc(gamesCollection, gameData);
+              const { id, ...gameData } = game
+              await addDoc(gamesCollection, gameData)
             }
-            setToast("Games imported", "success");
+            setToast('Games imported', 'success')
           } else {
-            setToast("Please login to import game", "error");
+            setToast('Please login to import game', 'error')
           }
         } catch (error) {
-          setToast(`Error importing games: ${error}`, "error");
+          setToast(`Error importing games: ${error}`, 'error')
         }
-        setIsImporting(false);
-      };
-      reader.readAsText(file);
+        setIsImporting(false)
+      }
+      reader.readAsText(file)
     }
-  };
+  }
 
   return (
     <div className="w-full">
@@ -54,6 +54,6 @@ export default function ImportGames({ setToast }) {
         {isImporting ? 'Importing...' : 'Import Games'}
       </label>
     </div>
-  );
+  )
 }
 

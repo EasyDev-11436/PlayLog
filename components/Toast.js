@@ -1,3 +1,5 @@
+// components/Toast.js
+
 'use client'
 
 import { useNotification } from '../contexts/NotificationContext'

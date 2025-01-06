@@ -1,3 +1,5 @@
+// app/user/[id]/page.js
+
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -8,21 +10,21 @@ import GameCard from '../../../components/GameCard'
 import Chat from '../../../components/Chat'
 import { MdVerified } from "react-icons/md"
 import Image from 'next/image'
-import { useRouter } from 'next/navigation';
-import { LuArrowLeft } from 'react-icons/lu';
-import { useTheme } from '../../../contexts/ThemeContext';
+import { useRouter } from 'next/navigation'
+import { LuArrowLeft } from 'react-icons/lu'
+import { useTheme } from '../../../contexts/ThemeContext'
 
 export default function UserProfile() {
   const { id } = useParams()
   const [user, setUser] = useState(null)
   const [games, setGames] = useState([])
   const [isFriend, setIsFriend] = useState(false)
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 16; // Number of games per page
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 16 // Number of games per page
 
   
-  const router = useRouter();
-  const { theme } = useTheme();
+  const router = useRouter()
+  const { theme } = useTheme()
 
   useEffect(() => {
     const fetchUserAndGames = async () => {
@@ -56,36 +58,36 @@ export default function UserProfile() {
 
   if (!user) return <div className="text-center py-8">Loading...</div>
 
-  const totalPages = Math.ceil(games.length / itemsPerPage);
-  const startIdx = (currentPage - 1) * itemsPerPage;
-  const paginatedGames = games.slice(startIdx, startIdx + itemsPerPage);
+  const totalPages = Math.ceil(games.length / itemsPerPage)
+  const startIdx = (currentPage - 1) * itemsPerPage
+  const paginatedGames = games.slice(startIdx, startIdx + itemsPerPage)
 
   const getPageNumbers = () => {
-    const pages = [];
+    const pages = []
     if (totalPages <= 5) {
       for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
+        pages.push(i)
       }
     } else {
       if (currentPage <= 3) {
-        pages.push(1, 2, 3, 4, "...", totalPages);
+        pages.push(1, 2, 3, 4, "...", totalPages)
       } else if (currentPage >= totalPages - 2) {
-        pages.push(1, "...", totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+        pages.push(1, "...", totalPages - 3, totalPages - 2, totalPages - 1, totalPages)
       } else {
-        pages.push(1, "...", currentPage - 1, currentPage, currentPage + 1, "...", totalPages);
+        pages.push(1, "...", currentPage - 1, currentPage, currentPage + 1, "...", totalPages)
       }
     }
-    return pages;
-  };
+    return pages
+  }
   
   const handlePageChange = (page) => {
-    if (page === "...") return;
-    setCurrentPage(page);
-  };
+    if (page === "...") return
+    setCurrentPage(page)
+  }
   
   const handleBack = () => {
-    router.push('/');
-  };
+    router.push('/')
+  }
   
   return (
     <div className="min-h-screen p-4 bg-gradient-to-br from-background to-secondary/20 transition-all duration-300">
@@ -134,7 +136,7 @@ export default function UserProfile() {
               <p className="text-gray-500">This user hasn&apos;t added any game yet.</p>
             ) : (
               paginatedGames.map(game => (
-              <GameCard key={game.id} game={game} />
+              <GameCard key={game.id} game={game} isShow={false} />
               )
             ))}
           </div>

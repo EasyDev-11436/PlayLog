@@ -1,10 +1,10 @@
 // components/GoogleAdsense.js
 
-import Script from "next/script";
+import Script from 'next/script'
 
 const GoogleAdsense = ({ pId }) => {
-  if (process.env.NODE_ENV !== "production") {
-    return null;
+  if (process.env.NODE_ENV !== 'production') {
+    return null
   }
   return (
     <Script
@@ -13,7 +13,7 @@ const GoogleAdsense = ({ pId }) => {
       crossOrigin="anonymous"
       strategy="afterInteractive"
     />
-  );
-};
+  )
+}
 
-export default GoogleAdsense;
+export default GoogleAdsense

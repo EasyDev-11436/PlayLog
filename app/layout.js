@@ -1,3 +1,5 @@
+// app/layout.js
+
 import './globals.css'
 import { ThemeProvider } from '../contexts/ThemeContext'
 import GoogleAdsense from '../components/GoogleAdsense'

@@ -1,20 +1,20 @@
 // components/AddGameForm.js
 
-import { useState } from 'react';
-import { addDoc, collection } from "firebase/firestore";
-import { db, auth } from "../firebase";
+import { useState } from 'react'
+import { addDoc, collection } from 'firebase/firestore'
+import { db, auth } from '../firebase'
 
 export default function AddGameForm({ setToast }) {
   const [newGame, setNewGame] = useState({
-    gameName: "",
-    gameVersion: "",
+    gameName: '',
+    gameVersion: '',
     isGameCompleted: false,
-  });
+  })
 
   const handleAddGame = async (e) => {
-    e.preventDefault();
-    const { gameName, gameVersion, isGameCompleted } = newGame;
-    const user = auth.currentUser;
+    e.preventDefault()
+    const { gameName, gameVersion, isGameCompleted } = newGame
+    const user = auth.currentUser
 
     if (user) {
       if (gameName && gameVersion) {
@@ -22,25 +22,25 @@ export default function AddGameForm({ setToast }) {
           game_name: gameName,
           game_version: gameVersion,
           is_game_completed: isGameCompleted,
-        };
+        }
         try {
-          await addDoc(collection(db, "users", user.uid, "games"), newGameObj);
+          await addDoc(collection(db, 'users', user.uid, 'games'), newGameObj)
           setNewGame({
-            gameName: "",
-            gameVersion: "",
+            gameName: '',
+            gameVersion: '',
             isGameCompleted: false,
-          });
-          setToast("Game added successfully", "success");
+          })
+          setToast('Game added successfully', 'success')
         } catch (err) {
-          setToast("Failed to add the game. Please try again.", "error");
+          setToast('Failed to add the game. Please try again.', 'error')
         }
       } else {
-        setToast("Please fill in all fields", "error");
+        setToast('Please fill in all fields', 'error')
       }
     } else {
-      setToast("Please login to add game", "error");
+      setToast('Please login to add game', 'error')
     }
-  };
+  }
 
   return (
     <form onSubmit={handleAddGame} className="space-y-4">
@@ -74,6 +74,6 @@ export default function AddGameForm({ setToast }) {
         Add Game
       </button>
     </form>
-  );
+  )
 }
 

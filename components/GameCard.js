@@ -1,14 +1,14 @@
 // components/GameCard.js
 
-import { AiOutlineEdit, AiOutlineDelete } from "react-icons/ai";
-import { MdCheckCircle, MdPending } from "react-icons/md";
+import { AiOutlineEdit, AiOutlineDelete } from 'react-icons/ai'
+import { MdCheckCircle, MdPending } from 'react-icons/md'
 
-export default function GameCard({ game, setError, onDeleteClick, onEditClick }) {
-  const isCompleted = game.is_game_completed;
+export default function GameCard({ game, setError, onDeleteClick, onEditClick, isShow}) {
+  const isCompleted = game.is_game_completed
   const statusClass = isCompleted
-    ? "bg-green-100 text-green-800"
-    : "bg-yellow-100 text-yellow-800";
-  const statusIcon = isCompleted ? <MdCheckCircle className="mr-1" /> : <MdPending className="mr-1" />;
+    ? 'bg-green-100 text-green-800'
+    : 'bg-yellow-100 text-yellow-800'
+  const statusIcon = isCompleted ? <MdCheckCircle className="mr-1" /> : <MdPending className="mr-1" />
 
   return (
     <div className="glassmorphism rounded-xl overflow-hidden transition-all duration-300 hover:shadow-xl relative">
@@ -20,18 +20,20 @@ export default function GameCard({ game, setError, onDeleteClick, onEditClick })
             className={`flex items-center px-3 py-1 rounded-full text-sm font-medium ${statusClass}`}
           >
             {statusIcon}
-            {isCompleted ? "Completed" : "In Progress"}
+            {isCompleted ? 'Completed' : 'In Progress'}
           </span>
         </div>
-        <div className="flex justify-end space-x-2">
-          <button onClick={() => onEditClick(game)} className="btn btn-secondary">
-            <AiOutlineEdit />
-          </button>
-          <button onClick={() => onDeleteClick(game)} className="btn btn-secondary">
-            <AiOutlineDelete />
-          </button>
+        {isShow && (
+          <div className="flex justify-end space-x-2">
+            <button onClick={() => onEditClick(game)} className="btn btn-secondary">
+              <AiOutlineEdit />
+            </button>
+            <button onClick={() => onDeleteClick(game)} className="btn btn-secondary">
+              <AiOutlineDelete />
+            </button>
+          </div>
+        )}
         </div>
-      </div>
     </div>
-  );
+  )
 }

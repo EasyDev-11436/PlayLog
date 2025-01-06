@@ -1,59 +1,59 @@
 // app/profile/page.js
 
-"use client";
+'use client'
 
-import { useState, useEffect } from 'react';
-import Image from 'next/image';
-import { auth, db } from '../../firebase';
-import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
-import { useRouter } from 'next/navigation';
-import { LuArrowLeft } from 'react-icons/lu';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useState, useEffect } from 'react'
+import Image from 'next/image'
+import { auth, db } from '../../firebase'
+import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'
+import { useRouter } from 'next/navigation'
+import { LuArrowLeft } from 'react-icons/lu'
+import { useTheme } from '../../contexts/ThemeContext'
 
-const MAX_FILE_SIZE = 1024 * 1024; // 1MB
+const MAX_FILE_SIZE = 1024 * 1024 // 1MB
 
 export default function ProfilePage() {
-  const [user, setUser] = useState(null);
-  const [name, setName] = useState('');
-  const [dob, setDob] = useState('');
-  const [bio, setBio] = useState('');
-  const [gender, setGender] = useState('');
-  const [profilePicture, setProfilePicture] = useState('/placeholder-avatar.svg');
+  const [user, setUser] = useState(null)
+  const [name, setName] = useState('')
+  const [dob, setDob] = useState('')
+  const [bio, setBio] = useState('')
+  const [gender, setGender] = useState('')
+  const [profilePicture, setProfilePicture] = useState('/placeholder-avatar.svg')
   const [shareGameList, setShareGameList] = useState(false)
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [toast, setToast] = useState('');
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [toast, setToast] = useState('')
 
-  const router = useRouter();
-  const { theme } = useTheme();
+  const router = useRouter()
+  const { theme } = useTheme()
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
-        setUser(user);
-        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        setUser(user)
+        const userDoc = await getDoc(doc(db, 'users', user.uid))
         if (userDoc.exists()) {
-          const userData = userDoc.data();
-          setName(userData.name || '');
-          setDob(userData.dob || '');
-          setBio(userData.bio || '');
-          setGender(userData.gender || '');
-          setProfilePicture(userData.profilePicture || '/placeholder-avatar.svg');
+          const userData = userDoc.data()
+          setName(userData.name || '')
+          setDob(userData.dob || '')
+          setBio(userData.bio || '')
+          setGender(userData.gender || '')
+          setProfilePicture(userData.profilePicture || '/placeholder-avatar.svg')
           setShareGameList(userDoc.data().shareGameList || false)
         }
       }
-      setIsLoading(false);
-    });
+      setIsLoading(false)
+    })
 
-    return () => unsubscribe();
-  }, []);
+    return () => unsubscribe()
+  }, [])
 
   const handleBack = () => {
-    router.push('/');
-  };
+    router.push('/')
+  }
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault()
     if (user) {
       await setDoc(doc(db, 'users', user.uid), {
         name,
@@ -61,10 +61,10 @@ export default function ProfilePage() {
         bio,
         gender,
         profilePicture
-      }, { merge: true });
-      setToast('Profile updated successfully!');
+      }, { merge: true })
+      setToast('Profile updated successfully!')
     }
-  };
+  }
   
   const handleShareGameListChange = async (e) => {
     const newShareGameList = e.target.checked
@@ -74,71 +74,71 @@ export default function ProfilePage() {
 
   const compressImage = (file) => {
     return new Promise((resolve, reject) => {
-      const reader = new FileReader();
+      const reader = new FileReader()
       reader.onload = (event) => {
-        const img = document.createElement('img');
+        const img = document.createElement('img')
         img.onload = () => {
-          const canvas = document.createElement('canvas');
-          const ctx = canvas.getContext('2d');
-          const scaleFactor = Math.min(1, MAX_FILE_SIZE / file.size);
-          canvas.width = img.width * scaleFactor;
-          canvas.height = img.height * scaleFactor;
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          const canvas = document.createElement('canvas')
+          const ctx = canvas.getContext('2d')
+          const scaleFactor = Math.min(1, MAX_FILE_SIZE / file.size)
+          canvas.width = img.width * scaleFactor
+          canvas.height = img.height * scaleFactor
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
           canvas.toBlob((blob) => {
             if (blob) {
-              resolve(URL.createObjectURL(blob));
+              resolve(URL.createObjectURL(blob))
             } else {
-              reject(new Error('Failed to compress image'));
+              reject(new Error('Failed to compress image'))
             }
-          }, 'image/jpeg', 0.7);
-        };
+          }, 'image/jpeg', 0.7)
+        }
         img.onerror = () => {
-          reject(new Error('Failed to load image'));
-        };
-        img.src = event.target.result;
-      };
+          reject(new Error('Failed to load image'))
+        }
+        img.src = event.target.result
+      }
       reader.onerror = () => {
-        reject(new Error('Failed to read file'));
-      };
-      reader.readAsDataURL(file);
-    });
-  };
+        reject(new Error('Failed to read file'))
+      }
+      reader.readAsDataURL(file)
+    })
+  }
 
   const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files[0]
     if (file) {
       if (file.size > MAX_FILE_SIZE) {
         try {
-          const compressedImage = await compressImage(file);
-          setProfilePicture(compressedImage);
-          setError('');
+          const compressedImage = await compressImage(file)
+          setProfilePicture(compressedImage)
+          setError('')
         } catch (err) {
-          setError('Error compressing image. Please try a smaller file.');
+          setError('Error compressing image. Please try a smaller file.')
         }
       } else {
-        const reader = new FileReader();
+        const reader = new FileReader()
         reader.onloadend = () => {
-          setProfilePicture(reader.result);
-          setError('');
-        };
-        reader.readAsDataURL(file);
+          setProfilePicture(reader.result)
+          setError('')
+        }
+        reader.readAsDataURL(file)
       }
     }
-  };
+  }
   
   useEffect(() => {
     if (toast) {
-      const timer = setTimeout(() => setToast(""), 3000); // Dismiss after 5 seconds
-      return () => clearTimeout(timer);
+      const timer = setTimeout(() => setToast(''), 3000) // Dismiss after 5 seconds
+      return () => clearTimeout(timer)
     }
-  }, [toast]);
+  }, [toast])
 
   if (isLoading) {
-    return <div className="text-center py-10">Loading...</div>;
+    return <div className="text-center py-10">Loading...</div>
   }
 
   if (!user) {
-    return <div className="text-center py-10">Please log in to view your profile.</div>;
+    return <div className="text-center py-10">Please log in to view your profile.</div>
   }
 
   return (
@@ -235,7 +235,7 @@ export default function ProfilePage() {
         >
           <span className="text-sm font-medium">{toast}</span>
           <button
-            onClick={() => setToast("")}
+            onClick={() => setToast('')}
             className="underline text-sm font-medium hover:text-foreground focus:outline-none"
           >
             Dismiss
@@ -243,6 +243,6 @@ export default function ProfilePage() {
         </div>
       )}
     </div>
-  );
+  )
 }
 

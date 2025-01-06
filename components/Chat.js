@@ -1,3 +1,5 @@
+// components/Chat.js
+
 import { useState, useEffect, useRef } from 'react'
 import { auth, db } from '../firebase'
 import { collection, query, where, orderBy, addDoc, onSnapshot } from 'firebase/firestore'

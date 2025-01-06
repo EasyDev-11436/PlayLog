@@ -1,130 +1,130 @@
 // app/page.js
 
-"use client";
+'use client'
 
-import { useState, useEffect } from "react";
-import { db, auth } from "../firebase";
-import { collection, onSnapshot, where, query, getDocs, addDoc, updateDoc, deleteDoc, doc } from "firebase/firestore";
-import AuthComponent from "../components/AuthComponent";
-import AddGameForm from "../components/AddGameForm";
-import GameCard from "../components/GameCard";
-import ExportGames from "../components/ExportGames";
-import ImportGames from "../components/ImportGames";
+import { useState, useEffect } from 'react'
+import { db, auth } from '../firebase'
+import { collection, onSnapshot, where, query, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore'
+import AuthComponent from '../components/AuthComponent'
+import AddGameForm from '../components/AddGameForm'
+import GameCard from '../components/GameCard'
+import ExportGames from '../components/ExportGames'
+import ImportGames from '../components/ImportGames'
 import FriendList from '../components/FriendList'
-import { useTheme } from "../contexts/ThemeContext";
-import { FiMoon, FiSun } from "react-icons/fi";
+import { useTheme } from '../contexts/ThemeContext'
+import { FiMoon, FiSun } from 'react-icons/fi'
 
 export default function Home() {
-  const [currentUser, setUser] = useState(null);
-  const [games, setGames] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedStatus, setSelectedStatus] = useState("All");
-  const [toast, setToast] = useState({ message: "", type: "" });
-  const [showDeleteBottomSheet, setShowDeleteBottomSheet] = useState(false);
-  const [showEditBottomSheet, setShowEditBottomSheet] = useState(false);
-  const [selectedGame, setSelectedGame] = useState(null);
-  const [editedGame, setEditedGame] = useState(null);
-  const [confirmationText, setConfirmationText] = useState("");
+  const [currentUser, setUser] = useState(null)
+  const [games, setGames] = useState([])
+  const [searchTerm, setSearchTerm] = useState('')
+  const [selectedStatus, setSelectedStatus] = useState('All')
+  const [toast, setToast] = useState({ message: '', type: '' })
+  const [showDeleteBottomSheet, setShowDeleteBottomSheet] = useState(false)
+  const [showEditBottomSheet, setShowEditBottomSheet] = useState(false)
+  const [selectedGame, setSelectedGame] = useState(null)
+  const [editedGame, setEditedGame] = useState(null)
+  const [confirmationText, setConfirmationText] = useState('')
   const [friendEmail, setFriendEmail] = useState('')
-  const { theme, toggleTheme} = useTheme();
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 16; // Number of games per page
+  const { theme, toggleTheme} = useTheme()
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 16 // Number of games per page
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
-        const gamesCollection = collection(db, "users", user.uid, "games");
-        const q = query(gamesCollection);
+        const gamesCollection = collection(db, 'users', user.uid, 'games')
+        const q = query(gamesCollection)
         const unsubscribeFromSnapshot = onSnapshot(q, (snapshot) => {
           const fetchedGames = snapshot.docs.map((doc) => ({
             ...doc.data(),
             id: doc.id,
-          }));
-          setGames(fetchedGames);
-        });
+          }))
+          setGames(fetchedGames)
+        })
         
-        setUser(user);
+        setUser(user)
 
-        return () => unsubscribeFromSnapshot();
+        return () => unsubscribeFromSnapshot()
       } else {
-        setGames([]);
+        setGames([])
       }
-    });
+    })
 
-    return () => unsubscribe();
-  }, []);
+    return () => unsubscribe()
+  }, [])
 
   const filteredGames = games.filter((game) => {
-    const matchesSearch = game.game_name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = game.game_name.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus =
-      selectedStatus === "All" ||
-      (selectedStatus === "Completed" && game.is_game_completed) ||
-      (selectedStatus === "In Progress" && !game.is_game_completed);
-    return matchesSearch && matchesStatus;
-  }).sort((a, b) => a.game_name.localeCompare(b.game_name));
+      selectedStatus === 'All' ||
+      (selectedStatus === 'Completed' && game.is_game_completed) ||
+      (selectedStatus === 'In Progress' && !game.is_game_completed)
+    return matchesSearch && matchesStatus
+  }).sort((a, b) => a.game_name.localeCompare(b.game_name))
 
   const handleDelete = async () => {
-    const user = auth.currentUser;
+    const user = auth.currentUser
     if (user && selectedGame && confirmationText === selectedGame.game_name) {
       try {
-        await deleteDoc(doc(db, "users", user.uid, "games", selectedGame.id));
-        showToast(`"${selectedGame?.game_name}" Deleted`, "success");
-        setShowDeleteBottomSheet(false);
-        setSelectedGame(null);
-        setConfirmationText("");
+        await deleteDoc(doc(db, 'users', user.uid, 'games', selectedGame.id))
+        showToast(`"${selectedGame?.game_name}" Deleted`, 'success')
+        setShowDeleteBottomSheet(false)
+        setSelectedGame(null)
+        setConfirmationText('')
       } catch (err) {
-        showToast("Failed to delete the game. Please try again.", "error");
+        showToast('Failed to delete the game. Please try again.', 'error')
       }
     } else {
-      showToast("Game name does not match. Please type the name correctly.", "error");
+      showToast('Game name does not match. Please type the name correctly.', 'error')
     }
-  };
+  }
 
   const handleEdit = async () => {
-    const user = auth.currentUser;
+    const user = auth.currentUser
     if (user && editedGame) {
       try {
-        await updateDoc(doc(db, "users", user.uid, "games", editedGame.id), editedGame);
-        showToast(`"${editedGame?.game_name}" updated`, "success");
-        setShowEditBottomSheet(false);
-        setEditedGame(null);
+        await updateDoc(doc(db, 'users', user.uid, 'games', editedGame.id), editedGame)
+        showToast(`"${editedGame?.game_name}" updated`, 'success')
+        setShowEditBottomSheet(false)
+        setEditedGame(null)
       } catch (err) {
-        showToast("Failed to update the game. Please try again.", "error");
+        showToast('Failed to update the game. Please try again.', 'error')
       }
     }
-  };
+  }
   
     // Pagination logic
-  const totalPages = Math.ceil(filteredGames.length / itemsPerPage);
-  const startIdx = (currentPage - 1) * itemsPerPage;
-  const paginatedGames = filteredGames.slice(startIdx, startIdx + itemsPerPage);
+  const totalPages = Math.ceil(filteredGames.length / itemsPerPage)
+  const startIdx = (currentPage - 1) * itemsPerPage
+  const paginatedGames = filteredGames.slice(startIdx, startIdx + itemsPerPage)
 
   const getPageNumbers = () => {
-    const pages = [];
+    const pages = []
     if (totalPages <= 5) {
       for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
+        pages.push(i)
       }
     } else {
       if (currentPage <= 3) {
-        pages.push(1, 2, 3, 4, "...", totalPages);
+        pages.push(1, 2, 3, 4, '...', totalPages)
       } else if (currentPage >= totalPages - 2) {
-        pages.push(1, "...", totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+        pages.push(1, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages)
       } else {
-        pages.push(1, "...", currentPage - 1, currentPage, currentPage + 1, "...", totalPages);
+        pages.push(1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages)
       }
     }
-    return pages;
-  };
+    return pages
+  }
 
   const handlePageChange = (page) => {
-    if (page === "...") return;
-    setCurrentPage(page);
-  };
+    if (page === '...') return
+    setCurrentPage(page)
+  }
   
   const showToast = (message, type) => {
-    setToast({ message, type });
-  };
+    setToast({ message, type })
+  }
   
   const handleAddFriend = async (e) => {
     e.preventDefault()
@@ -154,15 +154,15 @@ export default function Home() {
 
 
   useEffect(() => {
-    setCurrentPage(1); // Reset to page 1 when filters or search term changes
-  }, [selectedStatus, searchTerm]);
+    setCurrentPage(1) // Reset to page 1 when filters or search term changes
+  }, [selectedStatus, searchTerm])
   
   useEffect(() => {
     if (toast) {
-      const timer = setTimeout(() => setToast(""), 3000); // Dismiss after 5 seconds
-      return () => clearTimeout(timer);
+      const timer = setTimeout(() => setToast(''), 3000) // Dismiss after 5 seconds
+      return () => clearTimeout(timer)
     }
-  }, [toast]);
+  }, [toast])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 transition-all duration-300">
@@ -172,10 +172,10 @@ export default function Home() {
             PlayLog
           </h1>
           <button
-            onClick={() => toggleTheme(theme === "dark" ? "light" : "dark")}
+            onClick={() => toggleTheme(theme === 'dark' ? 'light' : 'dark')}
             className="p-2 rounded-full bg-secondary/50 hover:bg-secondary/80 transition-colors duration-200"
           >
-            {theme === "dark" ? <FiSun className="w-5 h-5" /> : <FiMoon className="w-5 h-5" />}
+            {theme === 'dark' ? <FiSun className="w-5 h-5" /> : <FiMoon className="w-5 h-5" />}
           </button>
         </div>
         <AuthComponent setToast={showToast} />
@@ -210,7 +210,7 @@ export default function Home() {
               />
               {searchTerm && (
                 <button
-                  onClick={() => setSearchTerm("")}
+                  onClick={() => setSearchTerm('')}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 >
                   <svg
@@ -247,14 +247,15 @@ export default function Home() {
           {paginatedGames.map((game) => (
             <GameCard 
               key={game.id} 
-              game={game} 
+              game={game}
+              isShow={true} 
               onEditClick={(selectedGame) => {
-                setEditedGame(selectedGame);
-                setShowEditBottomSheet(true);
+                setEditedGame(selectedGame)
+                setShowEditBottomSheet(true)
               }} 
               onDeleteClick={(selectedGame) => {
-                setSelectedGame(selectedGame);
-                setShowDeleteBottomSheet(true);
+                setSelectedGame(selectedGame)
+                setShowDeleteBottomSheet(true)
               }} 
             />
           ))}
@@ -306,9 +307,9 @@ export default function Home() {
             <div className="flex justify-end space-x-2">
               <button
                 onClick={() => {
-                  setShowDeleteBottomSheet(false);
-                  setSelectedGame(null);
-                  setConfirmationText("");
+                  setShowDeleteBottomSheet(false)
+                  setSelectedGame(null)
+                  setConfirmationText('')
                 }}
                 className="btn btn-secondary"
               >
@@ -353,8 +354,8 @@ export default function Home() {
             <div className="flex justify-end space-x-2">
               <button
                 onClick={() => {
-                  setShowEditBottomSheet(false);
-                  setEditedGame(null);
+                  setShowEditBottomSheet(false)
+                  setEditedGame(null)
                 }}
                 className="btn btn-secondary"
               >
@@ -372,7 +373,7 @@ export default function Home() {
           className={`fixed top-4 left-1/2 transform -translate-x-1/2 ${toast.type === "success" ? "bg-success/20" : "bg-destructive/20"} bg-clip-padding backdrop-filter backdrop-blur backdrop-saturate-0 backdrop-contrast-50 px-6 py-4 rounded-lg shadow-lg z-50 flex items-center justify-between space-x-4 max-w-screen-sm w-[calc(100%-2rem)] sm:w-auto`}>
           <span className="text-sm font-medium">{toast.message}</span>
           <button
-            onClick={() => setToast("")}
+            onClick={() => setToast('')}
             className="underline text-sm font-medium hover:text-foreground focus:outline-none"
           >
             Dismiss
@@ -380,5 +381,5 @@ export default function Home() {
         </div>
       )}
     </div>
-  );
+  )
 }

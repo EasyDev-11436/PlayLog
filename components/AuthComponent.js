@@ -1,57 +1,57 @@
 // components/AuthComponent.js
 
-"use client";
+'use client'
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Image from 'next/image';
-import { auth, db } from "../firebase";
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "firebase/auth";
-import { doc, getDoc, setDoc } from "firebase/firestore";
-import { MdVerified } from "react-icons/md";
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import Image from 'next/image'
+import { auth, db } from '../firebase'
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'firebase/auth'
+import { doc, getDoc, setDoc } from 'firebase/firestore'
+import { MdVerified } from 'react-icons/md'
 
 export default function AuthComponent({ setToast }) {
-  const [user, setUser] = useState(null);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [isLogin, setIsLogin] = useState(true);
-  const [name, setName] = useState('');
-  const [isVerified, setVerified] = useState(false);
-  const [roles, setRoles] = useState('');
-  const [profilePicture, setProfilePicture] = useState('/placeholder-avatar.svg');
-  const router = useRouter();
+  const [user, setUser] = useState(null)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [isLogin, setIsLogin] = useState(true)
+  const [name, setName] = useState('')
+  const [isVerified, setVerified] = useState(false)
+  const [roles, setRoles] = useState('')
+  const [profilePicture, setProfilePicture] = useState('/placeholder-avatar.svg')
+  const router = useRouter()
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
-        setUser(user);
-        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        setUser(user)
+        const userDoc = await getDoc(doc(db, 'users', user.uid))
         if (userDoc.exists()) {
-          const userData = userDoc.data();
-          setName(userData.name || '');
-          setVerified(userData.isVerified || false);
-          setRoles(userData.roles || '');
-          setProfilePicture(userData.profilePicture || '/placeholder-avatar.svg');
+          const userData = userDoc.data()
+          setName(userData.name || '')
+          setVerified(userData.isVerified || false)
+          setRoles(userData.roles || '')
+          setProfilePicture(userData.profilePicture || '/placeholder-avatar.svg')
         }
       } else {
-        setUser(null);
-        setName('');
+        setUser(null)
+        setName('')
         setVerified(false)
-        setRoles('');
-        setProfilePicture('/placeholder-avatar.svg');
+        setRoles('')
+        setProfilePicture('/placeholder-avatar.svg')
       }
-    });
+    })
 
-    return () => unsubscribe();
-  }, []);
+    return () => unsubscribe()
+  }, [])
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault()
     try {
       if (isLogin) {
-        await signInWithEmailAndPassword(auth, email, password);
+        await signInWithEmailAndPassword(auth, email, password)
       } else {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password)
         await setDoc(doc(db, 'users', userCredential.user.uid), {
           email: userCredential.user.email,
           name: '',
@@ -60,33 +60,33 @@ export default function AuthComponent({ setToast }) {
           roles: '',
           profilePicture: '/placeholder-avatar.svg',
           shareGameList: false
-        });
-        setToast(`${userCredential.user.email} has been registered`, "success");
+        })
+        setToast(`${userCredential.user.email} has been registered`, 'success')
       }
     } catch (error) {
-      const code = error.code;
-      console.log(code);
-      if (code === "auth/invalid-credential") {
-        setToast("Please check your email or password", "error");
-      } else if (code === "auth/email-already-in-use") {
-        setToast("The email has already registered", "error");
-      } else if (code == "auth/weak-password") {
-        setToast("Your password is too weak. Please choose a stronger password with at least 8 characters, including uppercase letters, lowercase letters, numbers, and special symbols.", "error")
+      const code = error.code
+      console.log(code)
+      if (code === 'auth/invalid-credential') {
+        setToast('Please check your email or password', 'error')
+      } else if (code === 'auth/email-already-in-use') {
+        setToast('The email has already registered', 'error')
+      } else if (code == 'auth/weak-password') {
+        setToast('Your password is too weak. Please choose a stronger password with at least 8 characters, including uppercase letters, lowercase letters, numbers, and special symbols.', 'error')
       }
     }
-  };
+  }
 
   const handleLogout = async () => {
     try {
-      await signOut(auth);
+      await signOut(auth)
     } catch (error) {
-      setToast(error.message, "error");
+      setToast(error.message, 'error')
     }
-  };
+  }
 
   const handleEditProfile = () => {
-    router.push('/profile');
-  };
+    router.push('/profile')
+  }
 
   if (user) {
     return (
@@ -121,7 +121,7 @@ export default function AuthComponent({ setToast }) {
           Logout
         </button>
       </div>
-    );
+    )
   }
 
   return (
@@ -158,6 +158,6 @@ export default function AuthComponent({ setToast }) {
         {isLogin ? 'Need an account? Register' : 'Already have an account? Login'}
       </button>
     </div>
-  );
+  )
 }
 
